@@ -99,6 +99,7 @@ namespace RC::Mod::HorseName
 					Output::send(MODSTR("Restore horse {} {} [{}]"), horseName, formID, LastRiddenHorse->GetName());
 
 					RenameHorse(pCheatManager, LastRiddenHorse, horseName);
+					LastRiddenHorse = nullptr;
 				}
 				else
 				{
@@ -109,39 +110,35 @@ namespace RC::Mod::HorseName
 		else if (LastRiddenHorse == nullptr || pHorse->GetName() != LastRiddenHorse->GetName())
 		{
 			const auto pTESForm = reinterpret_cast<TESActorBase*>(pHorse->GetTESRefComponent()->GetTESForm());
+			const auto formID = StringType(pHorse->GetTESRefComponent()->GetHexFormRefID().GetCharArray());
+			const auto horseName = pTESForm->GetActorName();
 
-			if (pTESForm != nullptr)
-			{
-				const auto horseName = pTESForm->GetActorName();
-				const auto formID = StringType(pHorse->GetTESRefComponent()->GetHexFormRefID().GetCharArray());
-
-				Output::send(MODSTR("Rename horse {} {} [{}]"), horseName, formID, pHorse->GetName());
-				RenameHorse(pCheatManager, pHorse, STR(" "));
-				HorseNames[formID] = horseName;
-			}
-			else
-			{
-				Output::send(MODSTR("Horse TESForm is not of type TESActorBase"));
-			}
+			Output::send(MODSTR("Rename horse {} {} [{}]"), horseName, formID, pHorse->GetName());
+			RenameHorse(pCheatManager, pHorse, STR(" "));
+			HorseNames[formID] = horseName;
+			LastRiddenHorse = pHorse;
 		}
 	}
 
-	auto HorseHandler::RenameHorse(UAltarCheatManager *pCheatManager, AActor* pHorse, const StringType &horseName) -> void
+	auto HorseHandler::RenameHorse(UAltarCheatManager *pCheatManager, AActor* pHorse, const StringType &horseName) const -> void
 	{
 		if (SetSelectedActorFunc != nullptr)
 		{
+			StringType command = std::format(STR("setactorfullname \"{}\""), horseName);
+
 			SetSelectedActorFunc(pCheatManager, pHorse);
+			pCheatManager->SendMultipleOblivionCommand({ FString(command.c_str()) });
 		}
 	}
 
-	void HorseHandler::ResetLastCalledHorse(UnrealScriptFunctionCallableContext&, void*)
+	void HorseHandler::ResetLastRiddenHorse(UnrealScriptFunctionCallableContext&, void*)
 	{
 		this->LastRiddenHorse = nullptr;
 	}
 
 	void HorseHandler::RegisterHooks()
 	{
-		RegisterHook(OnFadeToBlackEvent, bind_front(&HorseHandler::ResetLastCalledHorse, this), NoCallback, nullptr);
+		RegisterHook(OnFadeToBlackEvent, bind_front(&HorseHandler::ResetLastRiddenHorse, this), NoCallback, nullptr);
 		RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr);
 		RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr);
 	}

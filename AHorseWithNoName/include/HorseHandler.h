@@ -21,8 +21,8 @@ namespace RC::Mod::HorseName
         AVPairedPawn* LastRiddenHorse = nullptr;
 
         static auto PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
-        auto RenameHorse(UAltarCheatManager* pCheatManager, AActor *pHorse, const StringType& horseName) -> void;
-		auto ResetLastCalledHorse(UnrealScriptFunctionCallableContext& context, void* customData) -> void;
+        auto RenameHorse(UAltarCheatManager* pCheatManager, AActor *pHorse, const StringType& horseName) const -> void;
+		auto ResetLastRiddenHorse(UnrealScriptFunctionCallableContext& context, void* customData) -> void;
         auto PostGetHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
         auto UpdateHorseName(AVPairedPawn* pHorse) -> void;
 
