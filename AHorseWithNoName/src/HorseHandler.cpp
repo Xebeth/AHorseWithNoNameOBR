@@ -1,10 +1,5 @@
-#include <UObjectGlobals.hpp>
-#include <Unreal/UObject.hpp>
-#include <Unreal/FString.hpp>
-#include <Unreal/FProperty.hpp>
-#include <Unreal/TObjectPtr.hpp>
 #include <Unreal/UClass.hpp>
-#include <UFunction.hpp>
+#include <AActor.hpp>
 
 #include "PropertyMacro.h"
 #include "TESForm.h"
@@ -21,6 +16,11 @@
 namespace RC::Mod::HorseName
 {
 	using namespace Unreal::UObjectGlobals;
+
+	HorseHandler::HorseHandler(const fnSetSelectedActor setSelectedActorFunc)
+	{
+		SetSelectedActorFunc = setSelectedActorFunc;
+	}
 
 	auto HorseHandler::PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void *) -> void
 	{
@@ -98,7 +98,7 @@ namespace RC::Mod::HorseName
 
 					Output::send(MODSTR("Restore horse {} {} [{}]"), horseName, formID, LastRiddenHorse->GetName());
 
-					RenameHorse(pCheatManager, formID, horseName);
+					RenameHorse(pCheatManager, LastRiddenHorse, horseName);
 				}
 				else
 				{
@@ -116,7 +116,7 @@ namespace RC::Mod::HorseName
 				const auto formID = StringType(pHorse->GetTESRefComponent()->GetHexFormRefID().GetCharArray());
 
 				Output::send(MODSTR("Rename horse {} {} [{}]"), horseName, formID, pHorse->GetName());
-				RenameHorse(pCheatManager, formID, STR(" "));
+				RenameHorse(pCheatManager, pHorse, STR(" "));
 				HorseNames[formID] = horseName;
 			}
 			else
@@ -126,9 +126,12 @@ namespace RC::Mod::HorseName
 		}
 	}
 
-	auto HorseHandler::RenameHorse(UAltarCheatManager *pCheatManager, const StringType &formID, const StringType &horseName) -> void
+	auto HorseHandler::RenameHorse(UAltarCheatManager *pCheatManager, AActor* pHorse, const StringType &horseName) -> void
 	{
-
+		if (SetSelectedActorFunc != nullptr)
+		{
+			SetSelectedActorFunc(pCheatManager, pHorse);
+		}
 	}
 
 	void HorseHandler::ResetLastCalledHorse(UnrealScriptFunctionCallableContext&, void*)
