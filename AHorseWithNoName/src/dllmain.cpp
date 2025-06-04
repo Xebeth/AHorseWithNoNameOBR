@@ -25,7 +25,7 @@ class AHorseWithNoName final : public CppUserModBase
     using SignatureContainerMap = std::unordered_map<ScanTarget, std::vector<SignatureContainer>>;
 
     HorseHandler *m_pHorseHandler = nullptr;
-    void patch_delegate();
+    void FindSetSelectedActor();
 public:
     AHorseWithNoName()
     {
@@ -33,7 +33,6 @@ public:
         ModAuthors = STR("Beorn Blackclaw");
         ModName = STR("AHorseWithNoName");
         ModVersion = STR("1.0");
-        patch_delegate();
     }
 
     ~AHorseWithNoName() override
@@ -47,6 +46,8 @@ public:
 
     auto on_unreal_init() -> void override
     {
+        FindSetSelectedActor();
+
         if (m_pHorseHandler != nullptr)
         {
             m_pHorseHandler->RegisterHooks();
@@ -54,7 +55,7 @@ public:
     }
 };
 
-void AHorseWithNoName::patch_delegate()
+void AHorseWithNoName::FindSetSelectedActor()
 {
     SignatureData signature;
     signature.signature = "41 56 48 83 EC 30 33 ED 48 8B FA 48 8B F1";
