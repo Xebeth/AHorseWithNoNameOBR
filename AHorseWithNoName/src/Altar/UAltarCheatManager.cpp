@@ -14,5 +14,7 @@ namespace RC::Unreal
 
         UE_COPY_PROPERTY(CommandeLists, TArray<FString>)
         UE_CALL_FUNCTION()
+
+        UE_END_VOID_FUNCTION()
     }
 }
