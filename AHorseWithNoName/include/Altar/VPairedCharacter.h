@@ -6,6 +6,6 @@ namespace RC::Unreal
     {
         DECLARE_EXTERNAL_OBJECT_CLASS(AVPairedCharacter, Altar)
 
-        auto GetHorse() -> AVPairedPawn*;
+        auto GetHorse() -> AVPairedCreature*;
     };
 }

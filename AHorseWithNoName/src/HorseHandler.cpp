@@ -1,25 +1,42 @@
+#include <String/StringType.hpp>
 #include <Unreal/UClass.hpp>
 #include <AActor.hpp>
 
+#include <glaze/json/schema.hpp>
+#include <string>
+#include <map>
+
+#include "Config.h"
 #include "PropertyMacro.h"
 #include "TESForm.h"
 #include "TESActorBase.h"
 #include "UCheatManager.h"
 #include "PlayerController.h"
 #include "UAltarCheatManager.h"
-#include "VAltarPlayerController.h"
 #include "VTESObjectRefComponent.h"
 #include "VPairedPawn.h"
+#include "VPairedCreature.h"
 #include "VPairedCharacter.h"
+#include "VOblivionPlayerCharacter.h"
+#include "VAltarPlayerController.h"
 #include "HorseHandler.h"
 
-namespace RC::Mod::HorseName
+namespace RC::UserMod::HorseName
 {
-	using namespace Unreal::UObjectGlobals;
-
-	HorseHandler::HorseHandler(const fnSetSelectedActor setSelectedActorFunc)
+	HorseHandler::HorseHandler(const fnSetSelectedActor setSelectedActorFunc, Config *pConfig) : m_pConfig(pConfig)
 	{
 		SetSelectedActorFunc = setSelectedActorFunc;
+	}
+
+	HorseHandler::~HorseHandler()
+	{
+		if (m_pConfig != nullptr)
+		{
+			delete m_pConfig;
+			m_pConfig = nullptr;
+		}
+
+		SetSelectedActorFunc = nullptr;
 	}
 
 	auto HorseHandler::PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void *) -> void
@@ -41,7 +58,7 @@ namespace RC::Mod::HorseName
 			return;
 		}
 
-		const auto pHorse = reinterpret_cast<AVPairedPawn*>(*ppHorse);
+		const auto pHorse = reinterpret_cast<AVPairedCreature*>(*ppHorse);
 
 		if (pHorse == nullptr)
 		{
@@ -71,9 +88,39 @@ namespace RC::Mod::HorseName
 		}
 	}
 
-	auto HorseHandler::UpdateHorseName(AVPairedPawn *pHorse) -> void
+	auto HorseHandler::RestoreHorseName(AVAltarPlayerController *pPlayerController, AVPairedCreature *pHorse) -> void
 	{
-		const auto pPlayerController = reinterpret_cast<AVAltarPlayerController*>(FindFirstOf(STR("BP_AltarPlayerController_C")));
+		if (pHorse == nullptr || pPlayerController == nullptr)
+			return;
+
+		if (const auto editorID = pHorse->GetEditorID(); HorseNames.contains(editorID))
+		{
+			const auto horseName = HorseNames[editorID];
+
+			Output::send(MODSTR("Restore horse name {} -> {}"), editorID, horseName);
+			RenameHorse(pPlayerController, pHorse, horseName);
+		}
+		else
+		{
+			Output::send<LogLevel::Warning>(MODSTR("Horse name not found for ID {} [{}]"), editorID, pHorse->GetName());
+		}
+	}
+	auto HorseHandler::HideHorseName(AVAltarPlayerController *pPlayerController, AVPairedCreature *pHorse) -> void
+	{
+		if (pHorse != nullptr && pPlayerController != nullptr)
+		{
+			const auto editorID = pHorse->GetEditorID();
+			const auto actorName = pHorse->GetActorName();
+			const StringType horseName = HorseNames[editorID] = m_pConfig->GetHorseName(to_string(editorID));
+
+			Output::send(MODSTR("Hide horse name {} -> {}"), editorID, horseName);
+			RenameHorse(pPlayerController, pHorse, STR(" "));
+		}
+	}
+
+	auto HorseHandler::UpdateHorseName(AVPairedCreature *pHorse) -> void
+	{
+		const auto pPlayerController = PlayerController();
 
 		if (pPlayerController == nullptr)
 		{
@@ -83,48 +130,31 @@ namespace RC::Mod::HorseName
 		}
 
 		auto mounted = pPlayerController->IsHorseRiding() && pHorse != nullptr;
-		auto pCheatManager = pPlayerController->GetAltarCheatManager();
 
 		Output::send(MODSTR("UpdateHorseName: {}"), mounted ? STR("Mounted") : STR("Dismounted"));
-		Output::send(MODSTR("CheatManager: {}"), pCheatManager->GetName());
 
-		if (mounted == false)
+		if (ForceUnmount || mounted == false)
 		{
+			ForceUnmount = false;
+
 			if (LastRiddenHorse != nullptr)
 			{
-				if (const auto formID = StringType(LastRiddenHorse->GetTESRefComponent()->GetHexFormRefID().GetCharArray()); HorseNames.contains(formID))
-				{
-					const auto horseName = HorseNames[formID];
-
-					Output::send(MODSTR("Restore horse {} {} [{}]"), horseName, formID, LastRiddenHorse->GetName());
-
-					RenameHorse(pCheatManager, LastRiddenHorse, horseName);
-					LastRiddenHorse = nullptr;
-				}
-				else
-				{
-					Output::send<LogLevel::Warning>(MODSTR("Horse name not found for FormID {}"), formID);
-				}
+				RestoreHorseName(pPlayerController, LastRiddenHorse);
+				LastRiddenHorse = nullptr;
 			}
 		}
-		else if (LastRiddenHorse == nullptr || pHorse->GetName() != LastRiddenHorse->GetName())
+		else if (LastRiddenHorse == nullptr)
 		{
-			const auto pTESForm = reinterpret_cast<TESActorBase*>(pHorse->GetTESRefComponent()->GetTESForm());
-			const auto formID = StringType(pHorse->GetTESRefComponent()->GetHexFormRefID().GetCharArray());
-			const auto horseName = pTESForm->GetActorName();
-
-			Output::send(MODSTR("Rename horse {} {} [{}]"), horseName, formID, pHorse->GetName());
-			RenameHorse(pCheatManager, pHorse, STR(" "));
-			HorseNames[formID] = horseName;
+			HideHorseName(pPlayerController, pHorse);
 			LastRiddenHorse = pHorse;
 		}
 	}
 
-	auto HorseHandler::RenameHorse(UAltarCheatManager *pCheatManager, AActor* pHorse, const StringType &horseName) const -> void
+	auto HorseHandler::RenameHorse(AVAltarPlayerController *pPlayerController, AActor* pHorse, const StringType &horseName) const -> void
 	{
-		if (SetSelectedActorFunc != nullptr)
+		if (auto pCheatManager = pPlayerController->GetAltarCheatManager(); SetSelectedActorFunc != nullptr && pCheatManager != nullptr)
 		{
-			StringType command = std::format(STR("setactorfullname \"{}\""), horseName);
+			const StringType command = std::format(STR("setactorfullname \"{}\""), horseName);
 
 			SetSelectedActorFunc(pCheatManager, pHorse);
 			pCheatManager->SendMultipleOblivionCommand({ FString(command.c_str()) });
@@ -136,10 +166,22 @@ namespace RC::Mod::HorseName
 		this->LastRiddenHorse = nullptr;
 	}
 
-	void HorseHandler::RegisterHooks()
+	auto HorseHandler::RegisterHooks() -> void
 	{
-		RegisterHook(OnFadeToBlackEvent, bind_front(&HorseHandler::ResetLastRiddenHorse, this), NoCallback, nullptr);
-		RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr);
-		RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr);
+		UnregisterHooks();
+
+		RegisteredHooks.emplace(OnFadeToBlackEvent, RegisterHook(OnFadeToBlackEvent, bind_front(&HorseHandler::ResetLastRiddenHorse, this), NoCallback, nullptr));
+		RegisteredHooks.emplace(OnStartDockingEvent, RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr));
+		RegisteredHooks.emplace(GetHorseFunc, RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr));
+	}
+
+	auto HorseHandler::UnregisterHooks() -> void
+	{
+		for (const auto &[functionName, hooks] : RegisteredHooks)
+		{
+			UnregisterHook(functionName, hooks);
+		}
+
+		RegisteredHooks.clear();
 	}
 }

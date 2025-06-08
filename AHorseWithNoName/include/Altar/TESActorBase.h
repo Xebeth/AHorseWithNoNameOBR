@@ -6,6 +6,6 @@ namespace RC::Unreal
     {
         DECLARE_EXTERNAL_OBJECT_CLASS(TESActorBase, Altar)
 
-        auto GetActorName() -> StringType;
+        auto GetActorName() -> FString;
     };
 }

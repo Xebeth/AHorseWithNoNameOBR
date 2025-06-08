@@ -11,11 +11,18 @@ namespace RC::Unreal
 {
     IMPLEMENT_EXTERNAL_OBJECT_CLASS(TESActorBase)
 
-    auto TESActorBase::GetActorName() -> StringType
+    auto TESActorBase::GetActorName() -> FString
     {
         const FProperty* property = GetPropertyByNameInChain(STR("FullName"));
-        const auto subPathString = property->ContainerPtrToValuePtr<FString>(this);
 
-        return subPathString->GetCharArray();
+        if (property != nullptr)
+        {
+            if (const auto fullName = property->ContainerPtrToValuePtr<FString>(this); fullName != nullptr)
+            {
+                return *fullName;
+            }
+        }
+
+        return FString {};
     }
 }
