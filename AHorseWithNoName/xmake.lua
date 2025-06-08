@@ -7,3 +7,5 @@ target(projectName)
 	add_headerfiles("include/**.h", "include/Altar/**.h", "include/Engine/**.h")
 
 	add_files("src/**.cpp", "src/Altar/**.cpp", "src/Engine/**.cpp", "src/Config/**.cpp")
+	
+	add_configfiles("horses.json", {onlycopy = true})
