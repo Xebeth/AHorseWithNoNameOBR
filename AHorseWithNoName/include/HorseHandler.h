@@ -13,21 +13,21 @@ namespace RC::UserMod::HorseName
 
 	class HorseHandler
 	{
-        const CharType* OnFadeToBlackEvent = STR("/Script/Altar.VLevelChangeData:OnFadeToBlackBeginEventReceived"); // NOLINT(clang-diagnostic-unused-private-field)
-        const CharType* OnStartDockingEvent = STR("/Script/Altar.VPairedCharacter:OnStartDockingToHorse");          // NOLINT(clang-diagnostic-unused-private-field)
-        const CharType* GetHorseFunc = STR("/Script/Altar.VPairedCharacter:GetHorse");                              // NOLINT(clang-diagnostic-unused-private-field)
-        inline static UnrealScriptFunctionCallable NoCallback = [](UnrealScriptFunctionCallableContext&, void*) {};
+        const CharType* OnFadeToBlackEvent = STR("/Script/Altar.VLevelChangeData:OnFadeToBlackBeginEventReceived");
+        const CharType* OnStartDockingEvent = STR("/Script/Altar.VPairedCharacter:OnStartDockingToHorse");
+        const CharType* GetHorseFunc = STR("/Script/Altar.VPairedCharacter:GetHorse");
+
+		inline static UnrealScriptFunctionCallable NoCallback = [](UnrealScriptFunctionCallableContext&, void*) {};
 		std::map<StringType, std::pair<int, int>> RegisteredHooks;
 		fnSetSelectedActor SetSelectedActorFunc = nullptr;
         std::map<StringType, StringType> HorseNames;
         AVPairedCreature* LastRiddenHorse = nullptr;
-		bool ForceUnmount = false;
-
 		Config* m_pConfig = nullptr;
 
-        static auto PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
-        auto RenameHorse(AVAltarPlayerController *pPlayerController, AActor *pHorse, const StringType &horseName) const -> void;
-		auto ResetLastRiddenHorse(UnrealScriptFunctionCallableContext& context, void* customData) -> void;
+		static auto PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
+        auto RenameHorse(AVAltarPlayerController *pPlayerController, AVPairedCreature *pHorse, const StringType &horseName) const -> void;
+		auto RestoreHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature *pHorse) -> void;
+		auto HideHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature * pHorse) -> void;
         auto PostGetHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
         auto UpdateHorseName(AVPairedCreature* pHorse) -> void;
 
@@ -40,11 +40,7 @@ namespace RC::UserMod::HorseName
 			return reinterpret_cast<AVAltarPlayerController*>(FindFirstOf(STR("BP_AltarPlayerController_C")));
 		}
 
-		auto RestoreHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature *pHorse) -> void;
-		auto HideHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature * pHorse) -> void;
-		auto SetForceUnmount(const bool force) -> HorseHandler* { ForceUnmount = force; return this; }
         [[nodiscard]] auto GetLastRiddenHorse() const -> AVPairedCreature* { return LastRiddenHorse; }
-
         auto UnregisterHooks() -> void;
 		auto RegisterHooks() -> void;
 	};

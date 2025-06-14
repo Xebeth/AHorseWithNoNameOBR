@@ -1,4 +1,3 @@
-#include <Microsoft/AllowMicrosoftPlatformTypes.hpp>
 #include <SigScanner/SinglePassSigScanner.hpp>
 #include <Mod/CppUserModBase.hpp>
 #include <Unreal/BPMacros.hpp>

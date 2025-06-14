@@ -42,9 +42,9 @@ namespace RC::UserMod::HorseName
 
 	auto HorseHandler::PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void *) -> void
 	{
-		if (const auto pPlayer = reinterpret_cast<AVPairedCharacter*>(context.Context); pPlayer != nullptr)
+		if (const auto pRider = reinterpret_cast<AVPairedCharacter*>(context.Context); pRider != nullptr)
 		{
-			pPlayer->GetHorse();
+			pRider->GetHorse();
 		}
 	}
 
@@ -85,7 +85,7 @@ namespace RC::UserMod::HorseName
 		}
 		else
 		{
-			Output::send<LogLevel::Warning>(MODSTR("{} is not the player"), pRider->GetFullName());
+			Output::send<LogLevel::Warning>(MODSTR("{} is not the player"), pRider->GetName());
 		}
 	}
 
@@ -111,7 +111,6 @@ namespace RC::UserMod::HorseName
 		if (pHorse != nullptr && pPlayerController != nullptr)
 		{
 			const auto editorID = pHorse->GetEditorID();
-			const auto actorName = pHorse->GetActorName();
 			const StringType horseName = HorseNames[editorID] = m_pConfig->GetHorseName(to_string(editorID));
 
 			Output::send(MODSTR("Hide horse name {} -> {}"), editorID, horseName);
@@ -134,10 +133,8 @@ namespace RC::UserMod::HorseName
 
 		Output::send(MODSTR("UpdateHorseName: {}"), mounted ? STR("Mounted") : STR("Dismounted"));
 
-		if (ForceUnmount || mounted == false)
+		if (mounted == false)
 		{
-			ForceUnmount = false;
-
 			if (LastRiddenHorse != nullptr)
 			{
 				RestoreHorseName(pPlayerController, LastRiddenHorse);
@@ -151,27 +148,22 @@ namespace RC::UserMod::HorseName
 		}
 	}
 
-	auto HorseHandler::RenameHorse(AVAltarPlayerController *pPlayerController, AActor* pHorse, const StringType &horseName) const -> void
+	auto HorseHandler::RenameHorse(AVAltarPlayerController *pPlayerController, AVPairedCreature* pHorse, const StringType &horseName) const -> void
 	{
-		if (auto pCheatManager = pPlayerController->GetAltarCheatManager(); SetSelectedActorFunc != nullptr && pCheatManager != nullptr)
+		if (const auto pCheatManager = pPlayerController->GetAltarCheatManager(); SetSelectedActorFunc != nullptr && pCheatManager != nullptr)
 		{
-			const StringType command = std::format(STR("setactorfullname \"{}\""), horseName);
+			const auto command = FString {std::format(STR("SetActorFullName \"{}\""), horseName).c_str()};
 
 			SetSelectedActorFunc(pCheatManager, pHorse);
-			pCheatManager->SendMultipleOblivionCommand({ FString(command.c_str()) });
+			pCheatManager->SendMultipleOblivionCommand({ command });
 		}
-	}
-
-	void HorseHandler::ResetLastRiddenHorse(UnrealScriptFunctionCallableContext&, void*)
-	{
-		this->LastRiddenHorse = nullptr;
 	}
 
 	auto HorseHandler::RegisterHooks() -> void
 	{
 		UnregisterHooks();
 
-		RegisteredHooks.emplace(OnFadeToBlackEvent, RegisterHook(OnFadeToBlackEvent, bind_front(&HorseHandler::ResetLastRiddenHorse, this), NoCallback, nullptr));
+		RegisteredHooks.emplace(OnFadeToBlackEvent, RegisterHook(OnFadeToBlackEvent, [&](UnrealScriptFunctionCallableContext&, void*) { LastRiddenHorse = nullptr; }, NoCallback, nullptr));
 		RegisteredHooks.emplace(OnStartDockingEvent, RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr));
 		RegisteredHooks.emplace(GetHorseFunc, RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr));
 	}
