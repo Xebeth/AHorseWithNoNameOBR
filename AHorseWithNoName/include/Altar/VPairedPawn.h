@@ -8,7 +8,7 @@ namespace RC::Unreal
         DEFINE_PROPERTY(UVTESObjectRefComponent*, TESRefComponent)
 
         auto IsPlayerCharacter() -> bool;
-        TESForm*GetTESForm();
+        UTESForm* GetTESForm();
 
         auto GetActorName() -> StringType;
         auto GetEditorID() -> StringType;

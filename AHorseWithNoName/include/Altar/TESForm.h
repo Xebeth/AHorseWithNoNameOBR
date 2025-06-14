@@ -2,9 +2,9 @@
 
 namespace RC::Unreal
 {
-    class TESForm: public UObject
+    class UTESForm: public UObject
     {
-        DECLARE_EXTERNAL_OBJECT_CLASS(TESForm, Altar)
+        DECLARE_EXTERNAL_OBJECT_CLASS(UTESForm, Altar)
 
         auto GetFormEditorID() -> FString;
         auto GetHexFormID() -> FString;

@@ -20,7 +20,7 @@ namespace RC::Unreal
         UE_RETURN_PROPERTY(bool)
     }
 
-    TESForm* AVPairedPawn::GetTESForm()
+    UTESForm* AVPairedPawn::GetTESForm()
     {
         if (const auto pRefComponent = GetTESRefComponent(); pRefComponent != nullptr)
         {

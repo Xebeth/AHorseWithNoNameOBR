@@ -8,9 +8,9 @@ namespace RC::Unreal
 {
     using namespace std;
 
-    IMPLEMENT_EXTERNAL_OBJECT_CLASS(TESForm)
+    IMPLEMENT_EXTERNAL_OBJECT_CLASS(UTESForm)
 
-    auto TESForm::GetFormEditorID() -> FString
+    auto UTESForm::GetFormEditorID() -> FString
     {
         UE_BEGIN_NATIVE_FUNCTION_BODY("/Script/Altar.TESForm:GetFormEditorID")
 
@@ -19,7 +19,7 @@ namespace RC::Unreal
         UE_RETURN_PROPERTY(FString)
     }
 
-    auto TESForm::GetHexFormID() -> FString
+    auto UTESForm::GetHexFormID() -> FString
     {
         UE_BEGIN_NATIVE_FUNCTION_BODY("/Script/Altar.TESForm:GetHexFormID")
 
