@@ -51,6 +51,16 @@ namespace RC::UserMod::HorseName
 		}
 	}
 
+	auto HorseHandler::QueueExecution(const std::function<void()> &Lambda) -> void
+	{
+		QueuedExecution = Lambda;
+
+		if (QueuedExecution != nullptr)
+		{
+			PlayerController()->GetPlayerCharacter()->GetHorse();
+		}
+	}
+
 	auto HorseHandler::PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void *) -> void
 	{
 		if (const auto pRider = reinterpret_cast<AVPairedCharacter*>(context.Context); pRider != nullptr)
@@ -61,6 +71,14 @@ namespace RC::UserMod::HorseName
 
 	auto HorseHandler::PostGetHorse(const UnrealScriptFunctionCallableContext& context, void*) -> void
 	{
+		if (QueuedExecution != nullptr)
+		{
+			QueuedExecution();
+			QueuedExecution = nullptr;
+
+			return;
+		}
+
 		const auto ppHorse = static_cast<UObject**>(context.RESULT_DECL);
 
 		if (ppHorse == nullptr)

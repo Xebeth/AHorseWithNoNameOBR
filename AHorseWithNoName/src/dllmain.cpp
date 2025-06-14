@@ -64,6 +64,14 @@ namespace RC::UserMod::HorseName
                 if (m_pHorseHandler != nullptr)
                 {
                     m_pHorseHandler->RegisterHooks();
+
+                    register_keydown_event(Input::Key::H, [&] {
+                        m_pHorseHandler->QueueExecution([&] {
+                            if (m_pHorseHandler != nullptr && m_pHorseHandler->GetLastRiddenHorse() != nullptr)
+                                HorseHandler::OpenHorseInventory();
+                        });
+                    });
+
                 }
             }
         }

@@ -21,6 +21,7 @@ namespace RC::UserMod::HorseName
 		inline static UnrealScriptFunctionCallable NoCallback = [](UnrealScriptFunctionCallableContext&, void*) {};
 		std::map<StringType, std::pair<int, int>> RegisteredHooks;
 		fnSetSelectedActor SetSelectedActorFunc = nullptr;
+		std::function<void()> QueuedExecution = nullptr;
         std::map<StringType, StringType> HorseNames;
         AVPairedCreature* LastRiddenHorse = nullptr;
 		Config* m_pConfig = nullptr;
@@ -45,6 +46,7 @@ namespace RC::UserMod::HorseName
 		}
 
         [[nodiscard]] auto GetLastRiddenHorse() const -> AVPairedCreature* { return LastRiddenHorse; }
+		auto QueueExecution(const function<void()> &Lambda) -> void;
         auto UnregisterHooks() -> void;
 		auto RegisterHooks() -> void;
 	};
