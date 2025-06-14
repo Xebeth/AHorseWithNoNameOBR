@@ -13,6 +13,7 @@ namespace RC::UserMod::HorseName
 
 	class HorseHandler
 	{
+     	const CharType* OnActivatePressedEvent = STR("/Script/Altar.VEnhancedAltarPlayerController:ActivateInput_Pressed");
         const CharType* OnFadeToBlackEvent = STR("/Script/Altar.VLevelChangeData:OnFadeToBlackBeginEventReceived");
         const CharType* OnStartDockingEvent = STR("/Script/Altar.VPairedCharacter:OnStartDockingToHorse");
         const CharType* GetHorseFunc = STR("/Script/Altar.VPairedCharacter:GetHorse");
@@ -25,6 +26,8 @@ namespace RC::UserMod::HorseName
 		Config* m_pConfig = nullptr;
 
 		static auto PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
+		static auto PreOnActivatePressedEvent(UnrealScriptFunctionCallableContext &context, void* customData) -> void;
+
         auto RenameHorse(AVAltarPlayerController *pPlayerController, AVPairedCreature *pHorse, const StringType &horseName) const -> void;
 		auto RestoreHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature *pHorse) -> void;
 		auto HideHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature * pHorse) -> void;
@@ -35,6 +38,7 @@ namespace RC::UserMod::HorseName
 		HorseHandler(fnSetSelectedActor setSelectedActorFunc, Config *pConfig);
 		~HorseHandler();
 
+		static auto OpenHorseInventory(AVAltarPlayerController *pPlayerController = nullptr) -> bool;
 		static auto PlayerController() -> AVAltarPlayerController*
 		{
 			return reinterpret_cast<AVAltarPlayerController*>(FindFirstOf(STR("BP_AltarPlayerController_C")));

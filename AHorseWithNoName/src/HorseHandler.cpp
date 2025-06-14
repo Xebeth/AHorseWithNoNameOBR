@@ -40,6 +40,17 @@ namespace RC::UserMod::HorseName
 		SetSelectedActorFunc = nullptr;
 	}
 
+	auto HorseHandler::PreOnActivatePressedEvent(UnrealScriptFunctionCallableContext& context, void *) -> void
+	{
+		if (const auto pPlayerController = reinterpret_cast<AVAltarPlayerController*>(context.Context); pPlayerController != nullptr)
+		{
+			if (const auto pPlayer = pPlayerController->GetPlayerCharacter(); pPlayer != nullptr && pPlayer->IsSneaking())
+			{
+				context.OverrideOriginal = OpenHorseInventory(pPlayerController);
+			}
+		}
+	}
+
 	auto HorseHandler::PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void *) -> void
 	{
 		if (const auto pRider = reinterpret_cast<AVPairedCharacter*>(context.Context); pRider != nullptr)
@@ -87,6 +98,31 @@ namespace RC::UserMod::HorseName
 		{
 			Output::send<LogLevel::Warning>(MODSTR("{} is not the player"), pRider->GetName());
 		}
+	}
+
+	auto HorseHandler::OpenHorseInventory(AVAltarPlayerController *pPlayerController) -> bool
+	{
+		if (pPlayerController == nullptr)
+		{
+			pPlayerController = PlayerController();
+		}
+
+		if (pPlayerController != nullptr)
+		{
+			if (const auto pCheatManager = pPlayerController->GetAltarCheatManager(); pPlayerController != nullptr && pCheatManager != nullptr)
+			{
+				const auto castSpell = FString {STR("ahwsOpenSaddlebagsREF.Cast ahwsActivateHorseSpell Player")};
+				const auto moveLootBag = FString {STR("ahwsSaddlebagsREF.MoveTo Player 0,0,-1000")};
+				const auto moveActivator = FString {STR("ahwsOpenSaddlebagsREF.MoveTo Player")};
+				const auto enableActivator = FString {STR("ahwsOpenSaddlebagsREF.Enable")};
+
+				pCheatManager->SendMultipleOblivionCommand({moveActivator, enableActivator, moveLootBag, castSpell});
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	auto HorseHandler::RestoreHorseName(AVAltarPlayerController *pPlayerController, AVPairedCreature *pHorse) -> void
@@ -164,6 +200,7 @@ namespace RC::UserMod::HorseName
 		UnregisterHooks();
 
 		RegisteredHooks.emplace(OnFadeToBlackEvent, RegisterHook(OnFadeToBlackEvent, [&](UnrealScriptFunctionCallableContext&, void*) { LastRiddenHorse = nullptr; }, NoCallback, nullptr));
+		//RegisteredHooks.emplace(OnActivatePressedEvent, RegisterHook(OnActivatePressedEvent, &HorseHandler::PreOnActivatePressedEvent, NoCallback, nullptr));
 		RegisteredHooks.emplace(OnStartDockingEvent, RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr));
 		RegisteredHooks.emplace(GetHorseFunc, RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr));
 	}
