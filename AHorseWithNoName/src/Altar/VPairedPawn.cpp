@@ -4,6 +4,7 @@
 #include "PropertyMacro.h"
 #include "TESForm.h"
 #include "VTESObjectRefComponent.h"
+#include "VCharacterStatePairingComponent.h"
 #include "VPairedPawn.h"
 #include "TESActorBase.h"
 
@@ -30,6 +31,55 @@ namespace RC::Unreal
         return nullptr;
     }
 
+    auto AVPairedPawn::IsFalling() -> bool
+    {
+        if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
+        {
+            return pActorStateComponent->GetIsFalling();
+        }
+
+        return false;
+    }
+
+    auto AVPairedPawn::IsJumping() -> bool
+    {
+        if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
+        {
+            return pActorStateComponent->GetIsJumping();
+        }
+
+        return false;
+    }
+
+    auto AVPairedPawn::IsSneaking() -> bool
+    {
+        if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
+        {
+            return pActorStateComponent->GetIsSneaking();
+        }
+
+        return false;
+    }
+
+    auto AVPairedPawn::IsRunning() -> bool
+    {
+        if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
+        {
+            return pActorStateComponent->GetIsRunning();
+        }
+
+        return false;
+    }
+
+    auto AVPairedPawn::IsSwimming() -> bool
+    {
+        if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
+        {
+            return pActorStateComponent->GetIsSwimming();
+        }
+
+        return false;
+    }
 
     auto AVPairedPawn::GetActorName() -> StringType
     {

@@ -1,4 +1,4 @@
-#include <String/StringType.hpp>
+#include <Unreal/BPMacros.hpp>
 #include <Unreal/UClass.hpp>
 #include <AActor.hpp>
 
@@ -14,6 +14,7 @@
 #include "PlayerController.h"
 #include "UAltarCheatManager.h"
 #include "VTESObjectRefComponent.h"
+#include "VCharacterStatePairingComponent.h"
 #include "VPairedPawn.h"
 #include "VPairedCreature.h"
 #include "VPairedCharacter.h"

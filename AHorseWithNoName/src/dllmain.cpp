@@ -1,7 +1,7 @@
 #include <Microsoft/AllowMicrosoftPlatformTypes.hpp>
 #include <SigScanner/SinglePassSigScanner.hpp>
 #include <Mod/CppUserModBase.hpp>
-#include <String/StringType.hpp>
+#include <Unreal/BPMacros.hpp>
 #include <Unreal/UClass.hpp>
 #include <UE4SSProgram.hpp>
 #include <AActor.hpp>
@@ -19,6 +19,7 @@
 #include "UCheatManager.h"
 #include "PlayerController.h"
 #include "VTESObjectRefComponent.h"
+#include "VCharacterStatePairingComponent.h"
 #include "VPairedPawn.h"
 #include "VPairedCreature.h"
 #include "VPairedCharacter.h"

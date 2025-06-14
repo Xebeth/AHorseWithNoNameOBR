@@ -7,6 +7,7 @@
 #include "UAltarCheatManager.h"
 #include "TESForm.h"
 #include "VTESObjectRefComponent.h"
+#include "VCharacterStatePairingComponent.h"
 #include "VPairedPawn.h"
 #include "VPairedCreature.h"
 #include "VPairedCharacter.h"
