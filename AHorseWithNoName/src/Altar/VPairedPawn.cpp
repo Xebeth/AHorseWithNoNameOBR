@@ -23,7 +23,7 @@ namespace RC::Unreal
 
     UTESForm* AVPairedPawn::GetTESForm()
     {
-        if (const auto pRefComponent = GetTESRefComponent(); pRefComponent != nullptr)
+        if (const auto pRefComponent = GetTESRef(); pRefComponent != nullptr)
         {
             return pRefComponent->GetTESForm();
         }
@@ -110,6 +110,16 @@ namespace RC::Unreal
         if (const auto pTESForm = GetTESForm(); pTESForm != nullptr)
         {
             return StringType { pTESForm->GetHexFormID().GetCharArray() };
+        }
+
+        return StringType {};
+    }
+
+    auto AVPairedPawn::GetRefFormID() -> StringType
+    {
+        if (const auto pRefComponent = GetTESRef(); pRefComponent != nullptr)
+        {
+            return StringType { pRefComponent->GetHexFormRefID().GetCharArray() };
         }
 
         return StringType {};
