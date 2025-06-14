@@ -81,6 +81,18 @@ namespace RC::Unreal
         return false;
     }
 
+    auto AVPairedPawn::SetActorName(const FString& Name) -> bool
+    {
+        if (const auto pTESForm = GetTESForm(); pTESForm != nullptr)
+        {
+            const auto pActorBase = reinterpret_cast<TESActorBase*>(pTESForm);
+
+            return pActorBase->SetActorName(Name);
+        }
+
+        return false;
+    }
+
     auto AVPairedPawn::GetActorName() -> StringType
     {
         if (const auto pTESForm = GetTESForm(); pTESForm != nullptr)

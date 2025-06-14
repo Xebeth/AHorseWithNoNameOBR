@@ -17,6 +17,7 @@ namespace RC::Unreal
         auto IsJumping() -> bool;
         auto IsRunning() -> bool;
 
+        auto SetActorName(const FString& Name) -> bool;
         auto GetActorName() -> StringType;
         auto GetEditorID() -> StringType;
         auto GetFormID() -> StringType;
