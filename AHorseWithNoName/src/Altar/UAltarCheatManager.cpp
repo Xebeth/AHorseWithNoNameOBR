@@ -17,4 +17,24 @@ namespace RC::Unreal
 
         UE_END_VOID_FUNCTION()
     }
+
+    void UAltarCheatManager::ObvConsole(FString& Arg)
+    {
+        UE_BEGIN_NATIVE_FUNCTION_BODY("/Script/Altar.AltarCheatManager:ObvConsole")
+
+        UE_COPY_PROPERTY(Arg, FString)
+        UE_CALL_FUNCTION()
+
+        UE_END_VOID_FUNCTION()
+    }
+
+    void UAltarCheatManager::ObvConselect(FString& Arg)
+    {
+        UE_BEGIN_NATIVE_FUNCTION_BODY("/Script/Altar.AltarCheatManager:ObvConselect")
+
+        UE_COPY_PROPERTY(Arg, FString)
+        UE_CALL_FUNCTION()
+
+        UE_END_VOID_FUNCTION()
+    }
 }
