@@ -12,6 +12,7 @@ namespace RC::Unreal
         UTESForm* GetTESForm();
 
         auto IsSneaking() -> bool;
+        auto IsBlocking() -> bool;
         auto IsSwimming() -> bool;
         auto IsFalling() -> bool;
         auto IsJumping() -> bool;

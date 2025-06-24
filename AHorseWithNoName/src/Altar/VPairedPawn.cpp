@@ -61,6 +61,16 @@ namespace RC::Unreal
         return false;
     }
 
+    auto AVPairedPawn::IsBlocking() -> bool
+    {
+        if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
+        {
+            return pActorStateComponent->GetIsBlocking();
+        }
+
+        return false;
+    }
+
     auto AVPairedPawn::IsRunning() -> bool
     {
         if (const auto pActorStateComponent = GetActorState(); pActorStateComponent != nullptr)
