@@ -44,7 +44,7 @@ namespace RC::UserMod::HorseName
 	{
 		if (const auto pPlayerController = reinterpret_cast<AVAltarPlayerController*>(context.Context); pPlayerController != nullptr)
 		{
-			if (const auto pPlayer = pPlayerController->GetPlayerCharacter(); pPlayer != nullptr && pPlayer->IsSneaking())
+			if (const auto pPlayer = pPlayerController->GetPlayerCharacter(); pPlayer != nullptr && (pPlayer->IsBlocking() || pPlayer->IsSneaking()))
 			{
 				context.OverrideOriginal = OpenHorseInventory(pPlayerController);
 			}
@@ -200,7 +200,7 @@ namespace RC::UserMod::HorseName
 		UnregisterHooks();
 
 		RegisteredHooks.emplace(OnFadeToBlackEvent, RegisterHook(OnFadeToBlackEvent, [&](UnrealScriptFunctionCallableContext&, void*) { LastRiddenHorse = nullptr; }, NoCallback, nullptr));
-		//RegisteredHooks.emplace(OnActivatePressedEvent, RegisterHook(OnActivatePressedEvent, &HorseHandler::PreOnActivatePressedEvent, NoCallback, nullptr));
+		RegisteredHooks.emplace(OnActivatePressedEvent, RegisterHook(OnActivatePressedEvent, &HorseHandler::PreOnActivatePressedEvent, NoCallback, nullptr));
 		RegisteredHooks.emplace(OnStartDockingEvent, RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr));
 		RegisteredHooks.emplace(GetHorseFunc, RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr));
 	}
