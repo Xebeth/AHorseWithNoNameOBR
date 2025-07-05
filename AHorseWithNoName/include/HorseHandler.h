@@ -14,6 +14,8 @@ namespace RC::UserMod::HorseName
 	class HorseHandler
 	{
      	const CharType* OnActivatePressedEvent = STR("/Script/Altar.VEnhancedAltarPlayerController:ActivateInput_Pressed");
+		const CharType* OnBlockReleasedEvent = STR("/Script/Altar.VEnhancedAltarPlayerController:BlockInput_Released");
+		const CharType* OnBlockPressedEvent = STR("/Script/Altar.VEnhancedAltarPlayerController:BlockInput_Pressed");
         const CharType* OnFadeToBlackEvent = STR("/Script/Altar.VLevelChangeData:OnFadeToBlackBeginEventReceived");
         const CharType* OnStartDockingEvent = STR("/Script/Altar.VPairedCharacter:OnStartDockingToHorse");
         const CharType* GetHorseFunc = STR("/Script/Altar.VPairedCharacter:GetHorse");
@@ -23,12 +25,15 @@ namespace RC::UserMod::HorseName
 		fnSetSelectedActor SetSelectedActorFunc = nullptr;
         std::map<StringType, StringType> HorseNames;
         AVPairedCreature* LastRiddenHorse = nullptr;
+		bool m_BlockPressed = false;
 		Config* m_pConfig = nullptr;
 
 		static auto PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;
-		static auto PreOnActivatePressedEvent(UnrealScriptFunctionCallableContext &context, void* customData) -> void;
 
         auto RenameHorse(AVAltarPlayerController *pPlayerController, AVPairedCreature *pHorse, const StringType &horseName) const -> void;
+		auto PostOnBlockReleasedEvent(const UnrealScriptFunctionCallableContext &context, void* customData) -> void;
+		auto PostOnBlockPressedEvent(const UnrealScriptFunctionCallableContext &context, void* customData) -> void;
+		auto PreOnActivatePressedEvent(UnrealScriptFunctionCallableContext &context, void* customData) const -> void;
 		auto RestoreHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature *pHorse) -> void;
 		auto HideHorseName(AVAltarPlayerController* pPlayerController, AVPairedCreature * pHorse) -> void;
         auto PostGetHorse(const UnrealScriptFunctionCallableContext& context, void* customData) -> void;

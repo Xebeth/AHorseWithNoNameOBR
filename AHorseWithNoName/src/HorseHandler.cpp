@@ -40,15 +40,25 @@ namespace RC::UserMod::HorseName
 		SetSelectedActorFunc = nullptr;
 	}
 
-	auto HorseHandler::PreOnActivatePressedEvent(UnrealScriptFunctionCallableContext& context, void *) -> void
+	auto HorseHandler::PreOnActivatePressedEvent(UnrealScriptFunctionCallableContext& context, void *) const -> void
 	{
 		if (const auto pPlayerController = reinterpret_cast<AVAltarPlayerController*>(context.Context); pPlayerController != nullptr)
 		{
-			if (const auto pPlayer = pPlayerController->GetPlayerCharacter(); pPlayer != nullptr && (pPlayer->IsBlocking() || pPlayer->IsSneaking()))
+			if (m_BlockPressed)
 			{
 				context.OverrideOriginal = OpenHorseInventory(pPlayerController);
 			}
 		}
+	}
+
+	auto HorseHandler::PostOnBlockReleasedEvent(const UnrealScriptFunctionCallableContext&, void *) -> void
+	{
+		m_BlockPressed = false;
+	}
+
+	auto HorseHandler::PostOnBlockPressedEvent(const UnrealScriptFunctionCallableContext&, void *) -> void
+	{
+		m_BlockPressed = true;
 	}
 
 	auto HorseHandler::PostOnStartDockingToHorse(const UnrealScriptFunctionCallableContext& context, void *) -> void
@@ -200,7 +210,9 @@ namespace RC::UserMod::HorseName
 		UnregisterHooks();
 
 		RegisteredHooks.emplace(OnFadeToBlackEvent, RegisterHook(OnFadeToBlackEvent, [&](UnrealScriptFunctionCallableContext&, void*) { LastRiddenHorse = nullptr; }, NoCallback, nullptr));
-		RegisteredHooks.emplace(OnActivatePressedEvent, RegisterHook(OnActivatePressedEvent, &HorseHandler::PreOnActivatePressedEvent, NoCallback, nullptr));
+		RegisteredHooks.emplace(OnActivatePressedEvent, RegisterHook(OnActivatePressedEvent, bind_front(&HorseHandler::PreOnActivatePressedEvent, this), NoCallback, nullptr));
+		RegisteredHooks.emplace(OnBlockReleasedEvent, RegisterHook(OnBlockReleasedEvent, NoCallback, bind_front(&HorseHandler::PostOnBlockReleasedEvent, this), nullptr));
+		RegisteredHooks.emplace(OnBlockPressedEvent, RegisterHook(OnBlockPressedEvent, NoCallback, bind_front(&HorseHandler::PostOnBlockPressedEvent, this), nullptr));
 		RegisteredHooks.emplace(OnStartDockingEvent, RegisterHook(OnStartDockingEvent, NoCallback, &HorseHandler::PostOnStartDockingToHorse, nullptr));
 		RegisteredHooks.emplace(GetHorseFunc, RegisterHook(GetHorseFunc, NoCallback, bind_front(&HorseHandler::PostGetHorse, this), nullptr));
 	}
